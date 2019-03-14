@@ -66,8 +66,6 @@ public class Position
     }
 }
 
-
-
 public class MainClass
 {
     public static bool Debug = true;
@@ -169,6 +167,8 @@ public class MainClass
             else if (!myChef.Item.Content.Contains("ICE_CREAM"))
                 Use(game.IceCream.Position);
             // once ready, put it on the first empty table for now
+            else if (!myChef.Item.Content.Contains("BLUEBERRIES"))
+                Use(game.Blueberry.Position);
             else
                 Use(game.Window.Position);
         }
