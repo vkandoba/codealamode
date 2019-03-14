@@ -4,6 +4,8 @@ using System.IO;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 
 public class Game
 {
@@ -11,6 +13,8 @@ public class Game
     public Table Dishwasher;
     public Table Window;
     public Table Blueberry;
+    public Table Strawberry;
+    public Table Chopping;
     public Table IceCream;
     public List<Table> Tables = new List<Table>();
 }
@@ -77,16 +81,18 @@ public class MainClass
         game.Players[0] = new Player(null, null);
         game.Players[1] = new Player(null, null);
 
-        for (int i = 0; i < 7; i++)
+        for (int y = 0; y < 7; y++)
         {
             string kitchenLine = ReadLine();
             for (var x = 0; x < kitchenLine.Length; x++)
             {
-                if (kitchenLine[x] == 'W') game.Window = new Table { Position = new Position(x, i), HasFunction = true };
-                if (kitchenLine[x] == 'D') game.Dishwasher = new Table { Position = new Position(x, i), HasFunction = true };
-                if (kitchenLine[x] == 'I') game.IceCream = new Table { Position = new Position(x, i), HasFunction = true };
-                if (kitchenLine[x] == 'B') game.Blueberry = new Table { Position = new Position(x, i), HasFunction = true };
-                if (kitchenLine[x] == '#') game.Tables.Add(new Table { Position = new Position(x, i) });
+                if (kitchenLine[x] == 'W') game.Window = new Table { Position = new Position(x, y), HasFunction = true };
+                if (kitchenLine[x] == 'D') game.Dishwasher = new Table { Position = new Position(x, y), HasFunction = true };
+                if (kitchenLine[x] == 'I') game.IceCream = new Table { Position = new Position(x, y), HasFunction = true };
+                if (kitchenLine[x] == 'B') game.Blueberry = new Table { Position = new Position(x, y), HasFunction = true };
+                if (kitchenLine[x] == 'C') game.Chopping = new Table { Position = new Position(x, y), HasFunction = true };
+                if (kitchenLine[x] == 'S') game.Strawberry = new Table { Position = new Position(x, y), HasFunction = true };
+                if (kitchenLine[x] == '#') game.Tables.Add(new Table { Position = new Position(x, y) });
             }
         }
 
@@ -159,18 +165,30 @@ public class MainClass
                 int customerAward = int.Parse(inputs[1]);
             }
 
-            // GAME LOGIC
-            // fetch a dish, pick ice cream
             var myChef = game.Players[0];
-            if (!myChef.Item?.HasPlate ?? false)
-                Use(game.Dishwasher.Position);
-            else if (!myChef.Item.Content.Contains("ICE_CREAM"))
-                Use(game.IceCream.Position);
-            // once ready, put it on the first empty table for now
-            else if (!myChef.Item.Content.Contains("BLUEBERRIES"))
-                Use(game.Blueberry.Position);
-            else
-                Use(game.Window.Position);
+            var positionToUse = PositionTo(myChef, game);
+            Use(positionToUse);
         }
+    }
+    public static Position PositionTo(Player myChef, Game game)
+    {
+        if (!myChef.Item?.HasPlate ?? false)
+        {
+            if (myChef.Item.Content.Contains("CHOPPED_STRAWBERRIES"))
+                return game.Dishwasher.Position;
+
+            if (myChef.Item.Content.Contains("STRAWBERRIES"))
+                return game.Chopping.Position;
+
+            return game.Strawberry.Position;
+        }
+
+        if (!myChef.Item.Content.Contains("ICE_CREAM"))
+            return game.IceCream.Position;
+
+        if (!myChef.Item.Content.Contains("BLUEBERRIES"))
+                 return game.Blueberry.Position;
+
+        return game.Window.Position;
     }
 }
