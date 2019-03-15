@@ -19,6 +19,7 @@ public class Game
     public List<Table> Tables = new List<Table>();
 }
 
+
 public class Table
 {
     public Position Position;
@@ -30,6 +31,7 @@ public class Item
 {
     public string Content;
     public bool HasPlate;
+
     public Item(string content)
     {
         Content = content;
@@ -41,11 +43,13 @@ public class Player
 {
     public Position Position;
     public Item Item;
+
     public Player(Position position, Item item)
     {
         Position = position;
         Item = item;
     }
+
     public void Update(Position position, Item item)
     {
         Position = position;
@@ -56,6 +60,7 @@ public class Player
 public class Position
 {
     public int X, Y;
+
     public Position(int x, int y)
     {
         X = x;
@@ -86,13 +91,18 @@ public class MainClass
             string kitchenLine = ReadLine();
             for (var x = 0; x < kitchenLine.Length; x++)
             {
-                if (kitchenLine[x] == 'W') game.Window = new Table { Position = new Position(x, y), HasFunction = true };
-                if (kitchenLine[x] == 'D') game.Dishwasher = new Table { Position = new Position(x, y), HasFunction = true };
-                if (kitchenLine[x] == 'I') game.IceCream = new Table { Position = new Position(x, y), HasFunction = true };
-                if (kitchenLine[x] == 'B') game.Blueberry = new Table { Position = new Position(x, y), HasFunction = true };
-                if (kitchenLine[x] == 'C') game.Chopping = new Table { Position = new Position(x, y), HasFunction = true };
-                if (kitchenLine[x] == 'S') game.Strawberry = new Table { Position = new Position(x, y), HasFunction = true };
-                if (kitchenLine[x] == '#') game.Tables.Add(new Table { Position = new Position(x, y) });
+                if (kitchenLine[x] == 'W') game.Window = new Table {Position = new Position(x, y), HasFunction = true};
+                if (kitchenLine[x] == 'D')
+                    game.Dishwasher = new Table {Position = new Position(x, y), HasFunction = true};
+                if (kitchenLine[x] == 'I')
+                    game.IceCream = new Table {Position = new Position(x, y), HasFunction = true};
+                if (kitchenLine[x] == 'B')
+                    game.Blueberry = new Table {Position = new Position(x, y), HasFunction = true};
+                if (kitchenLine[x] == 'C')
+                    game.Chopping = new Table {Position = new Position(x, y), HasFunction = true};
+                if (kitchenLine[x] == 'S')
+                    game.Strawberry = new Table {Position = new Position(x, y), HasFunction = true};
+                if (kitchenLine[x] == '#') game.Tables.Add(new Table {Position = new Position(x, y)});
             }
         }
 
@@ -146,11 +156,14 @@ public class MainClass
             {
                 t.Item = null;
             }
-            int numTablesWithItems = int.Parse(ReadLine()); // the number of tables in the kitchen that currently hold an item
+
+            int numTablesWithItems =
+                int.Parse(ReadLine()); // the number of tables in the kitchen that currently hold an item
             for (int i = 0; i < numTablesWithItems; i++)
             {
                 inputs = ReadLine().Split(' ');
-                var table = game.Tables.First(t => t.Position.X == int.Parse(inputs[0]) && t.Position.Y == int.Parse(inputs[1]));
+                var table = game.Tables.First(t =>
+                    t.Position.X == int.Parse(inputs[0]) && t.Position.Y == int.Parse(inputs[1]));
                 table.Item = new Item(inputs[2]);
             }
 
@@ -170,6 +183,7 @@ public class MainClass
             Use(positionToUse);
         }
     }
+
     public static Position PositionTo(Player myChef, Game game)
     {
         if (!myChef.Item?.HasPlate ?? false)
@@ -180,14 +194,21 @@ public class MainClass
             if (myChef.Item.Content.Contains("STRAWBERRIES"))
                 return game.Chopping.Position;
 
-            return game.Strawberry.Position;
+            var chopped =
+                game.Tables.FirstOrDefault(x => x.Item != null && x.Item.Content.Contains("CHOPPED_STRAWBERRIES"));
+            return chopped == null ? game.Strawberry.Position : chopped.Position;
         }
+
+        var d1 = myChef.Position.DistanceTo(game.IceCream.Position);
+        var d2 = myChef.Position.DistanceTo(game.Blueberry.Position);
+        if (!myChef.Item.Content.Contains("ICE_CREAM") && !myChef.Item.Content.Contains("BLUEBERRIES"))
+            return d1 > d2 ? game.Blueberry.Position : game.IceCream.Position;
 
         if (!myChef.Item.Content.Contains("ICE_CREAM"))
             return game.IceCream.Position;
 
         if (!myChef.Item.Content.Contains("BLUEBERRIES"))
-                 return game.Blueberry.Position;
+            return game.Blueberry.Position;
 
         return game.Window.Position;
     }
